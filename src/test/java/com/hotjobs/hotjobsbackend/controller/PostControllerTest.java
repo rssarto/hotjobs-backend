@@ -4,11 +4,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentMatchers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -94,7 +97,31 @@ public class PostControllerTest {
 		this.mockMvc
 			.perform(MockMvcRequestBuilders.get("/api/v1/post/" + pageIndex + "/" + pageSize))
 			.andExpect(MockMvcResultMatchers.status().isOk())
+			.andExpect(MockMvcResultMatchers.jsonPath("$.total").value(paginatedList.getTotal()))
 			.andExpect(jsonPath("$.pageIndex").value(pageIndex))
 			.andExpect(jsonPath("$.pageNumber").value(pageSize));
+	}
+	
+	@Test
+	public void findByCreatedDate_ShouldRetornList() throws Exception {
+		final int pageIndex = 1;
+		final int pageSize = 5;
+		final List<Post> posts = PostServiceTest.getPostList();
+		final Calendar calendar = Calendar.getInstance();
+		calendar.setTime(new Date());
+		
+		final String strCreationDate = (calendar.get(Calendar.MONTH) + 1) + "-" + calendar.get(Calendar.DAY_OF_MONTH) + "-" + calendar.get(Calendar.YEAR); 
+		final PaginatedList<Post> paginatedList = new PaginatedList<>(posts, pageIndex, pageSize, posts.size());
+		
+		when(this.postService.findByCreationDate(ArgumentMatchers.any(Date.class), ArgumentMatchers.anyInt(), ArgumentMatchers.anyInt())).then(answer -> {
+			return paginatedList;
+		});
+		
+		this.mockMvc
+			.perform(MockMvcRequestBuilders.get("/api/v1/post/creation/" + strCreationDate + "/" + pageIndex + "/" + pageSize))
+			.andExpect(MockMvcResultMatchers.status().isOk())
+			.andExpect(MockMvcResultMatchers.jsonPath("$.total").value(paginatedList.getTotal()))
+			.andExpect(MockMvcResultMatchers.jsonPath("$.pageIndex").value(pageIndex))
+			.andExpect(MockMvcResultMatchers.jsonPath("$.pageNumber").value(pageSize));
 	}
 }

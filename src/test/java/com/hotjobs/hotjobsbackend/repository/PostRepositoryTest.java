@@ -16,7 +16,6 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.test.annotation.IfProfileValue;
 import org.springframework.test.annotation.ProfileValueSourceConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -53,7 +52,7 @@ public class PostRepositoryTest {
 		
 		this.postRepository.insert(posts);
 		
-		List<Post> findByEntityList = this.postRepository.findByEntity("london", getPageRequest());
+		List<Post> findByEntityList = this.postRepository.findByEntity("london", PostDAO.getPageable(1, 5));
 		assertThat(findByEntityList).isNotNull();
 		assertThat(findByEntityList.isEmpty()).isFalse();
 		assertThat(findByEntityList.size() == 1).isTrue();
@@ -80,7 +79,7 @@ public class PostRepositoryTest {
 		posts.add(new Post("endTechNet IT Recruitment (Permanent): Java Developer - Paris ... https://t.co/q5hOjvtU8l", now, Arrays.asList(new PostEntity("- Paris", "paris")), Arrays.asList("https://t.co/q5hOjvtU8l")));
 		this.postRepository.insert(posts);
 		
-		List<Post> findByPeriod = this.postRepository.findByCreatedAtBetween(iniDate, endDate, getPageRequest());
+		List<Post> findByPeriod = this.postRepository.findByCreatedAtBetween(iniDate, endDate, PostDAO.getPageable(1, 5));
 		assertThat(findByPeriod).isNotNull();
 		assertThat(findByPeriod.size() == posts.size()).isTrue();
 		for( Post post : posts ) {
@@ -97,12 +96,6 @@ public class PostRepositoryTest {
 		Page<Post> postPage = this.postRepository.findAll(PostDAO.getPageable(1, 5));
 		assertThat(postPage).isNotNull();
 		assertThat(postPage.getTotalElements()).isEqualTo(posts.size());
-	}
-	
-	public static Pageable getPageRequest() {
-        final int page = 0;
-        final int pageSize = 5;
-        return PostDAO.getPageable(page, pageSize);
 	}
 	
 	public static List<Post> getPosts(){

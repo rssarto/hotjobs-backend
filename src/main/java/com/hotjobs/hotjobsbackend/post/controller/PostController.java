@@ -1,5 +1,7 @@
 package com.hotjobs.hotjobsbackend.post.controller;
 
+import java.util.Date;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,7 +16,7 @@ import com.hotjobs.hotjobsbackend.post.domain.Post;
 import com.hotjobs.hotjobsbackend.post.service.PostService;
 
 @RestController
-@RequestMapping(value="/api/v1")
+@RequestMapping(value="/api/v1/post")
 public class PostController {
 	
 	private PostService postService;
@@ -23,25 +25,31 @@ public class PostController {
 		this.postService = postService;
 	}
 	
-	@GetMapping("/post/{page}/{pageSize}")
+	@GetMapping("/{page}/{pageSize}")
 	public ResponseEntity<PaginatedList<Post>> listAll(@PathVariable final int page,@PathVariable final int pageSize){
 		PaginatedList<Post> listAll = this.postService.listAll(page, pageSize);
 		return new ResponseEntity<>(listAll, HttpStatus.OK);
 	}
 	
-	@GetMapping("/post/{entity}/{page}/{pageSize}")
+	@GetMapping("/{entity}/{page}/{pageSize}")
 	public ResponseEntity<PaginatedList<Post>> findByEntity(@PathVariable String entity, @PathVariable final int page, @PathVariable final int pageSize){
 		PaginatedList<Post> findByEntity = this.postService.findByEntity(entity, page, pageSize);
 		return new ResponseEntity<>(findByEntity, HttpStatus.OK);
 	}
 	
-	@GetMapping("/post/relatedLink/{page}/{pageSize}")
+	@GetMapping("/relatedLink/{page}/{pageSize}")
 	public ResponseEntity<PaginatedList<Post>> findByRelatedLink(@RequestParam(name="link") final String relatedLink, @PathVariable final int page, @PathVariable final int pageSize){
 		PaginatedList<Post> findByRelatedLink = this.postService.findByRelatedLink(relatedLink, page, pageSize);
 		return new ResponseEntity<>(findByRelatedLink, HttpStatus.OK);
 	}
 	
-	@GetMapping("/post/{entity}/count")
+	@GetMapping("/creation/{creationDate}/{page}/{pageSize}")
+	public ResponseEntity<PaginatedList<Post>> findByCreationDate(@PathVariable Date creationDate, @PathVariable int page, @PathVariable int pageSize){
+		final PaginatedList<Post> findByCreationDate = this.postService.findByCreationDate(creationDate, page, pageSize);
+		return new ResponseEntity<>(findByCreationDate, HttpStatus.OK);
+	}
+	
+	@GetMapping("/{entity}/count")
 	public ResponseEntity<Long> countByEntity(@PathVariable final String entity){
 		long countByEntity = this.postService.countByEntity(entity);
 		return new ResponseEntity<>(countByEntity, HttpStatus.OK);
