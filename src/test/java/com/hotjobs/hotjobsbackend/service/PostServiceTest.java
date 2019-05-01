@@ -84,6 +84,29 @@ public class PostServiceTest {
 		assertThat(count == total).isTrue();
 	}
 	
+	@Test
+	public void shouldFindByCreationDateAndEntity_ShouldReturnList() {
+		final String entity = "london";
+		final Date creationDate = new Date();
+		final int page = 1;
+		final int pageSize = 5;
+		final List<Post> posts = Arrays.asList(new Post("Senior Java #Developer - FinTech - £110,000 - onezeero. ( City of London, UK )  - [ 📋 More Info… https://t.co/EbXMHk5Xiz", creationDate, Arrays.asList(new PostEntity("London", entity)), Arrays.asList("https://t.co/EbXMHk5Xiz")));
+		final PaginatedList<Post> paginatedList = new PaginatedList<>(posts, page, pageSize, posts.size());
+		when(this.postDao.findByCreationDateAndEntity(creationDate, entity, page, pageSize)).then(answer -> {
+			return paginatedList;
+		});
+		
+		PaginatedList<Post> findByCreationDateAndEntity = this.postService.findByCreationDateAndEntity(creationDate, entity, page, pageSize);
+		assertThat(findByCreationDateAndEntity).isNotNull();
+		assertThat(findByCreationDateAndEntity.getPageIndex()).isEqualTo(page);
+		assertThat(findByCreationDateAndEntity.getPageNumber()).isEqualTo(pageSize);
+		assertThat(findByCreationDateAndEntity.getTotal()).isEqualTo(posts.size());
+		assertThat(findByCreationDateAndEntity.getResults()).isNotNull();
+		findByCreationDateAndEntity.getResults().forEach(post -> {
+			assertThat(posts.contains(post)).isTrue();
+		});
+	}
+	
 	public static List<Post> getPostList(){
 		final List<Post> posts = new ArrayList<>();
 		posts.add(new Post("Senior Java #Developer - FinTech - £110,000 - onezeero. ( City of London, UK )  - [ 📋 More Info… https://t.co/EbXMHk5Xiz", new Date(), Arrays.asList(new PostEntity("London", "london")), Arrays.asList("https://t.co/EbXMHk5Xiz")));

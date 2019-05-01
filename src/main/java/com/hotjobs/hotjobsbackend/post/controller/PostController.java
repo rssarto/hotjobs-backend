@@ -49,6 +49,12 @@ public class PostController {
 		return new ResponseEntity<>(findByCreationDate, HttpStatus.OK);
 	}
 	
+	@GetMapping("/creation/{creationDate}/{entity}/{page}/{pageSize}")
+	public ResponseEntity<PaginatedList<Post>> findByCreationDate(@PathVariable Date creationDate, @PathVariable String entity, @PathVariable int page, @PathVariable int pageSize){
+		final PaginatedList<Post> resultList = this.postService.findByCreationDateAndEntity(creationDate, entity, page, pageSize);
+		return new ResponseEntity<>(resultList, HttpStatus.OK);
+	}
+	
 	@GetMapping("/{entity}/count")
 	public ResponseEntity<Long> countByEntity(@PathVariable final String entity){
 		long countByEntity = this.postService.countByEntity(entity);

@@ -2,6 +2,7 @@ package com.hotjobs.hotjobsbackend.dao;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.Date;
 import java.util.List;
 
 import org.junit.Before;
@@ -68,6 +69,21 @@ public class PostDAOTest {
 		assertThat(findByRelatedLink.getResults().size()).isEqualTo(1L);
 		findByRelatedLink.getResults().forEach(postItem -> {
 			assertThat(postItem.getRelatedLinks().contains(relatedLink)).isTrue();
+		});
+	}
+	
+	@Test
+	public void findByCreationDateAndEntity_ShouldReturnList() {
+		final List<Post> posts = PostRepositoryTest.getPosts();
+		this.postRepository.deleteAll();
+		this.postRepository.insert(posts);
+		PaginatedList<Post> findByCreationDateAndEntity = this.postDao.findByCreationDateAndEntity(new Date(), "london", 1, 5);
+		assertThat(findByCreationDateAndEntity).isNotNull();
+		assertThat(findByCreationDateAndEntity.getTotal()).isEqualTo(1L);
+		assertThat(findByCreationDateAndEntity.getResults()).isNotNull();
+		assertThat(findByCreationDateAndEntity.getResults().size()).isEqualTo(1);
+		findByCreationDateAndEntity.getResults().forEach(post -> {
+			assertThat(posts.contains(post));
 		});
 	}
 

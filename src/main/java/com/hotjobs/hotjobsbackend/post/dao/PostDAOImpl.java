@@ -47,6 +47,22 @@ public class PostDAOImpl implements PostDAO {
 	}
 	
 	@Override
+	public PaginatedList<Post> findByCreationDateAndEntity(final Date creationDate, final String entity, final int page, final int pageSize) {
+		List<Post> resultList = this.mongoTemplate.find(this.queryByCreationDateAndEntity(creationDate, entity), Post.class);
+		final long countByCreationDateAndEntity = this.countByCreationDateAndEntity(creationDate, entity);
+		return new PaginatedList<>(resultList, page, pageSize, countByCreationDateAndEntity);
+	}
+	
+	@Override	
+	public long countByCreationDateAndEntity(final Date creationDate, final String entity) {
+		return this.mongoTemplate.count(this.queryByCreationDateAndEntity(creationDate, entity), Post.COLLECTION_NAME);
+	}
+	
+	private Query queryByCreationDateAndEntity(final Date creationDate, final String entity) {
+		return new Query(this.criteriaByEntity(entity)).addCriteria(this.criteriaByCreationDate(creationDate));		
+	}
+	
+	@Override
 	public PaginatedList<Post> findByRelatedLink(String relatedLink, final int page, final int pageSize){
 		final List<Post> results = this.mongoTemplate.find(this.createQueryCountByRelatedLink(relatedLink), Post.class, Post.COLLECTION_NAME);
 		final long countByRelatedLink = this.mongoTemplate.count(this.createQueryCountByRelatedLink(relatedLink), Post.COLLECTION_NAME);
@@ -68,15 +84,24 @@ public class PostDAOImpl implements PostDAO {
 	}
 	
 	private Query createRegexQueryByEntity(String entity) {
-		final Query query = new Query(new Criteria("entities").elemMatch(new Criteria("normal").regex(String.format(".*%s.*", entity), "i")));
+		final Query query = new Query(criteriaByEntity(entity));
 		return query;
+	}
+
+	private Criteria criteriaByEntity(String entity) {
+		return new Criteria("entities").elemMatch(new Criteria("normal").regex(String.format(".*%s.*", entity), "i"));
 	}
 
 	@Override
 	public long countByCreationDate(final Date creationDate) {
+		final Query query = new Query(this.criteriaByCreationDate(creationDate));
+		return this.mongoTemplate.count(query, Post.COLLECTION_NAME);
+	}
+	
+	private Criteria criteriaByCreationDate(final Date creationDate) {
 		final Date initDateInterval = PostDAO.getInitDateInterval(creationDate);
 		final Date endDateInterval = PostDAO.getEndDateInterval(creationDate);
-		final Query query = new Query(new Criteria("createdAt").gt(initDateInterval).lt(endDateInterval));
-		return this.mongoTemplate.count(query, Post.COLLECTION_NAME);
+		return new Criteria("createdAt").gt(initDateInterval).lt(endDateInterval);
+		
 	}
 }

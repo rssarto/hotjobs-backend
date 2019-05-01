@@ -48,4 +48,9 @@ public class PostServiceImpl implements PostService {
 	public PaginatedList<Post> findByRelatedLink(String relatedLink, final int page, final int pageSize){
 		return this.postDAO.findByRelatedLink(relatedLink, page, pageSize);
 	}
+	
+	@Override
+	public PaginatedList<Post> findByCreationDateAndEntity(Date creationDate, String entity, int page, int pageSize){
+		return this.postDAO.findByCreationDateAndEntity(creationDate, entity, page, pageSize);
+	}
 }

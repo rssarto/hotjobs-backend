@@ -17,9 +17,12 @@ public interface PostDAO {
 	PaginatedList<Post> listAll(int page, int pageSize);
 	PaginatedList<Post> findByEntity(String entity, int page, int pageSize);
 	PaginatedList<Post> findByCreationDate(Date creationDate, int page, int pageSize);
+	PaginatedList<Post> findByRelatedLink(String relatedLink, int page, int pageSize);
+	PaginatedList<Post> findByCreationDateAndEntity(Date creationDate, String entity, int page, int pageSize);
 	long total();
 	long countByEntity(String entity);
 	long countByCreationDate(Date creationDate);
+	long countByCreationDateAndEntity(Date creationDate, String entity);
 	
 	public static Pageable getPageable(int page, int pageSize) {
 		return PageRequest.of(page - 1, pageSize, Direction.DESC, "createdAt");
@@ -50,5 +53,4 @@ public interface PostDAO {
 		}
 		return endDate;
 	}
-	PaginatedList<Post> findByRelatedLink(String relatedLink, int page, int pageSize);
 }

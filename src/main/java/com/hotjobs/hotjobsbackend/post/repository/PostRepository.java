@@ -15,7 +15,6 @@ import com.hotjobs.hotjobsbackend.post.domain.Post;
 public interface PostRepository extends MongoRepository<Post, String>, QuerydslPredicateExecutor<Post>  {
 	
 	public static final String QUERY_REGEX_BY_ENTITY = "{entities: {$elemMatch: { normal: {$regex:'.*?0.*', $options:'i'}}}}";
-	
 	@Query(QUERY_REGEX_BY_ENTITY)
 	List<Post> findByEntity(String entity, Pageable pageable);
 	
