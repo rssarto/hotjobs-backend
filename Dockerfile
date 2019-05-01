@@ -1,7 +1,7 @@
+#Multi-stage build - https://docs.docker.com/develop/develop-images/dockerfile_best-practices/
 FROM maven:3.6.0-jdk-11-slim AS build
 COPY src /home/app/src
 COPY pom.xml /home/app
-#RUN mvn -f /home/app/pom.xml -Dmaven.test.skip=true clean package
 RUN mvn -f /home/app/pom.xml clean package
 
 FROM openjdk:11-jre-slim
