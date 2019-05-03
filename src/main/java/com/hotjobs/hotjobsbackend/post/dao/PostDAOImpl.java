@@ -6,7 +6,6 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 
@@ -34,7 +33,7 @@ public class PostDAOImpl implements PostDAO {
 
 	@Override
 	public PaginatedList<Post> findByEntity(final String entity, final int page, final int pageSize) {
-		final List<Post> resultList = this.mongoTemplate.find(this.createRegexQueryByEntity(entity).with(PostDAO.getPageable(page, pageSize)), Post.class, Post.COLLECTION_NAME);
+		final List<Post> resultList = this.mongoTemplate.find(new PostQueryBuilder().setEntity(entity).build().with(PostDAO.getPageable(page, pageSize)), Post.class, Post.COLLECTION_NAME);
 		final long countByEntity = this.countByEntity(entity);
 		return new PaginatedList<>(resultList, page, pageSize, countByEntity);
 	}
@@ -48,24 +47,47 @@ public class PostDAOImpl implements PostDAO {
 	
 	@Override
 	public PaginatedList<Post> findByCreationDateAndEntity(final Date creationDate, final String entity, final int page, final int pageSize) {
-		List<Post> resultList = this.mongoTemplate.find(this.queryByCreationDateAndEntity(creationDate, entity), Post.class);
+		PostQueryBuilder postQueryBuilder = new PostQueryBuilder();
+		postQueryBuilder.setCreationDate(creationDate)
+						.setEntity(entity);
+		List<Post> resultList = this.mongoTemplate.find(postQueryBuilder.build().with(PostDAO.getPageable(page, pageSize)), Post.class);
 		final long countByCreationDateAndEntity = this.countByCreationDateAndEntity(creationDate, entity);
 		return new PaginatedList<>(resultList, page, pageSize, countByCreationDateAndEntity);
 	}
 	
-	@Override	
-	public long countByCreationDateAndEntity(final Date creationDate, final String entity) {
-		return this.mongoTemplate.count(this.queryByCreationDateAndEntity(creationDate, entity), Post.COLLECTION_NAME);
+	@Override
+	public PaginatedList<Post> findByTextAndEntityAndCreationDate(final String text, final String entity, final Date creationDate, final int page, final int pageSize){
+		PostQueryBuilder postQueryBuilder = new PostQueryBuilder();
+		postQueryBuilder.setTextLower(text)
+						.setEntity(entity)
+						.setCreationDate(creationDate);
+		List<Post> resultList = this.mongoTemplate.find(postQueryBuilder.build().with(PostDAO.getPageable(page, pageSize)), Post.class);
+		long countByTextAndEntityAndCreationDate = this.countByTextAndEntityAndCreationDate(text, entity, creationDate);
+		return new PaginatedList<>(resultList, page, pageSize, countByTextAndEntityAndCreationDate);
 	}
 	
-	private Query queryByCreationDateAndEntity(final Date creationDate, final String entity) {
-		return new Query(this.criteriaByEntity(entity)).addCriteria(this.criteriaByCreationDate(creationDate));		
+	@Override
+	public long countByTextAndEntityAndCreationDate(final String text, final String entity, final Date creationDate) {
+		PostQueryBuilder postQueryBuilder = new PostQueryBuilder();
+		postQueryBuilder.setTextLower(text)
+						.setEntity(entity)
+						.setCreationDate(creationDate);		
+		return this.mongoTemplate.count(postQueryBuilder.build(), Post.COLLECTION_NAME);
+	}
+	
+	@Override	
+	public long countByCreationDateAndEntity(final Date creationDate, final String entity) {
+		PostQueryBuilder postQueryBuilder = new PostQueryBuilder();
+		postQueryBuilder.setEntity(entity)
+						.setCreationDate(creationDate);		
+		return this.mongoTemplate.count(postQueryBuilder.build(), Post.COLLECTION_NAME);
 	}
 	
 	@Override
 	public PaginatedList<Post> findByRelatedLink(String relatedLink, final int page, final int pageSize){
-		final List<Post> results = this.mongoTemplate.find(this.createQueryCountByRelatedLink(relatedLink), Post.class, Post.COLLECTION_NAME);
-		final long countByRelatedLink = this.mongoTemplate.count(this.createQueryCountByRelatedLink(relatedLink), Post.COLLECTION_NAME);
+		final Query relatedLinkQuery = new PostQueryBuilder().setRelatedLink(relatedLink).build();
+		final List<Post> results = this.mongoTemplate.find(relatedLinkQuery.with(PostDAO.getPageable(page, pageSize)), Post.class, Post.COLLECTION_NAME);
+		final long countByRelatedLink = this.mongoTemplate.count(relatedLinkQuery, Post.COLLECTION_NAME);
 		return new PaginatedList<>(results, page, pageSize, countByRelatedLink);
 	}
 
@@ -76,7 +98,7 @@ public class PostDAOImpl implements PostDAO {
 
 	@Override
 	public long countByEntity(final String entity) {
-		return this.mongoTemplate.count(this.createRegexQueryByEntity(entity), Post.COLLECTION_NAME);
+		return this.mongoTemplate.count(new PostQueryBuilder().setEntity(entity).build(), Post.COLLECTION_NAME);
 	}
 	
 	@Override
@@ -86,29 +108,9 @@ public class PostDAOImpl implements PostDAO {
 		return new PaginatedList<>(postList, page, pageSize, count);
 	}
 	
-	private Query createQueryCountByRelatedLink(String relatedLink) {
-		return new Query(Criteria.where("relatedLinks").is(relatedLink));
-	}
-	
-	private Query createRegexQueryByEntity(String entity) {
-		final Query query = new Query(criteriaByEntity(entity));
-		return query;
-	}
-
-	private Criteria criteriaByEntity(String entity) {
-		return new Criteria("entities").elemMatch(new Criteria("normal").regex(String.format(".*%s.*", entity), "i"));
-	}
-
 	@Override
 	public long countByCreationDate(final Date creationDate) {
-		final Query query = new Query(this.criteriaByCreationDate(creationDate));
-		return this.mongoTemplate.count(query, Post.COLLECTION_NAME);
+		return this.mongoTemplate.count(new PostQueryBuilder().setCreationDate(creationDate).build(), Post.COLLECTION_NAME);
 	}
 	
-	private Criteria criteriaByCreationDate(final Date creationDate) {
-		final Date initDateInterval = PostDAO.getInitDateInterval(creationDate);
-		final Date endDateInterval = PostDAO.getEndDateInterval(creationDate);
-		return new Criteria("createdAt").gt(initDateInterval).lt(endDateInterval);
-		
-	}
 }

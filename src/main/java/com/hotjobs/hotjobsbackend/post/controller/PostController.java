@@ -66,5 +66,11 @@ public class PostController {
 		final PaginatedList<Post> findByText = this.postService.findByText(text, page, pageSize);
 		return new ResponseEntity<>(findByText, HttpStatus.OK);
 	}
+	
+	@GetMapping("/text/{text}/entity/{entity}/creationDate/{creationDate}/{page}/{pageSize}")
+	public ResponseEntity<PaginatedList<Post>> findByTextAndEntityAndCreationDate(@PathVariable final String text, @PathVariable final String entity, @PathVariable  final Date creationDate, @PathVariable  final int page, @PathVariable final int pageSize){
+		PaginatedList<Post> findByTextAndEntityAndCreationDate = this.postService.findByTextAndEntityAndCreationDate(text, entity, creationDate, page, pageSize);
+		return new ResponseEntity<>(findByTextAndEntityAndCreationDate, HttpStatus.OK);
+	}
 
 }

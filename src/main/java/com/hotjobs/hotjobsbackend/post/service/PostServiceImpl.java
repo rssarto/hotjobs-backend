@@ -58,5 +58,12 @@ public class PostServiceImpl implements PostService {
 	public PaginatedList<Post> findByText(String filter, int pageIndex, int pageSize) {
 		return this.postDAO.findByText(filter.toLowerCase(), pageIndex, pageSize);
 	}
+
+	@Override
+	public PaginatedList<Post> findByTextAndEntityAndCreationDate(String text, String entity, Date creationDate,int page, int pageSize) {
+		return this.postDAO.findByTextAndEntityAndCreationDate(text.toLowerCase(), entity, creationDate, page, pageSize);
+	}
+	
+	
 	
 }

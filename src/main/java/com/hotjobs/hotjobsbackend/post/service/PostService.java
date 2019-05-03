@@ -12,6 +12,7 @@ public interface PostService {
 	PaginatedList<Post> findByRelatedLink(String relatedLink, int page, int pageSize);
 	PaginatedList<Post> findByCreationDateAndEntity(Date creationDate, String entity, int page, int pageSize);
 	PaginatedList<Post> findByText(String filter, int pageIndex, int pageSize);
+	PaginatedList<Post> findByTextAndEntityAndCreationDate(String text, String entity, Date creationDate, int page,int pageSize);
 	long total();
 	long countByEntity(String entity);
 }
