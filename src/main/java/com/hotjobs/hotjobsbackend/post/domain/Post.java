@@ -8,7 +8,6 @@ import java.util.List;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -17,7 +16,6 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-@AllArgsConstructor
 public class Post extends AbstractDocument {
 	
 	public static final String COLLECTION_NAME = "post";
@@ -26,9 +24,19 @@ public class Post extends AbstractDocument {
 	public static final DateTimeFormatter CREATION_DATE_FORMATTER = DateTimeFormatter.ofPattern(STR_DATE_FORMAT);
 	
 	private String text;
+	private String text_lower;
 	private Date createdAt;
 	private List<PostEntity> entities;
 	private List<String> relatedLinks;
+	
+	public Post(String text, Date createdAt, List<PostEntity> entities, List<String> relatedLinks) {
+		super();
+		this.text = text;
+		this.text_lower = text.toLowerCase();
+		this.createdAt = createdAt;
+		this.entities = entities;
+		this.relatedLinks = relatedLinks;
+	}
 	
 	@Override
 	public boolean equals(Object o) {

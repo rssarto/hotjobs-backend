@@ -57,8 +57,14 @@ public class PostController {
 	
 	@GetMapping("/{entity}/count")
 	public ResponseEntity<Long> countByEntity(@PathVariable final String entity){
-		long countByEntity = this.postService.countByEntity(entity);
+		final long countByEntity = this.postService.countByEntity(entity);
 		return new ResponseEntity<>(countByEntity, HttpStatus.OK);
+	}
+	
+	@GetMapping("/text/{text}/{page}/{pageSize}")
+	public ResponseEntity<PaginatedList<Post>> findByText(@PathVariable final String text, @PathVariable final int page, @PathVariable final int pageSize){
+		final PaginatedList<Post> findByText = this.postService.findByText(text, page, pageSize);
+		return new ResponseEntity<>(findByText, HttpStatus.OK);
 	}
 
 }

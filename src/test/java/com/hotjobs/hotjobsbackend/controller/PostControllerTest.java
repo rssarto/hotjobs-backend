@@ -151,4 +151,25 @@ public class PostControllerTest {
 			.andExpect(MockMvcResultMatchers.jsonPath("$.pageIndex").value(pageIndex))
 			.andExpect(MockMvcResultMatchers.jsonPath("$.pageNumber").value(pageSize));
 	}
+	
+	@Test
+	public void findByText_ShouldRetornList() throws Exception {
+		final int pageIndex = 1;
+		final int pageSize = 5;
+		final List<Post> posts = Arrays.asList(new Post("Senior Java #Developer - FinTech - £110,000 - onezeero. ( City of London, UK )  - [ 📋 More Info… https://t.co/EbXMHk5Xiz", new Date(), Arrays.asList(new PostEntity("London", "london")), Arrays.asList("https://t.co/EbXMHk5Xiz")));
+		final PaginatedList<Post> paginatedList = new PaginatedList<>(posts, pageIndex, pageSize, posts.size());
+
+		final String filter = "fintech";
+		when(this.postService.findByText(filter, pageIndex, pageSize)).then(answer -> {
+			return paginatedList;
+		});
+		
+		this.mockMvc
+			.perform(MockMvcRequestBuilders.get("/api/v1/post/text/" + filter + "/" + pageIndex + "/" + pageSize))
+			.andExpect(MockMvcResultMatchers.status().isOk())
+			.andExpect(MockMvcResultMatchers.jsonPath("$.total").value(paginatedList.getTotal()))
+			.andExpect(MockMvcResultMatchers.jsonPath("$.pageIndex").value(pageIndex))
+			.andExpect(MockMvcResultMatchers.jsonPath("$.pageNumber").value(pageSize));
+		
+	}
 }

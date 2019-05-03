@@ -79,6 +79,13 @@ public class PostDAOImpl implements PostDAO {
 		return this.mongoTemplate.count(this.createRegexQueryByEntity(entity), Post.COLLECTION_NAME);
 	}
 	
+	@Override
+	public PaginatedList<Post> findByText(String text, int page, int pageSize){
+		List<Post> postList = this.postRepository.findByText_lowerRegex(text, PostDAO.getPageable(page, pageSize));
+		long count = this.postRepository.countByText_lowerRegex(text);
+		return new PaginatedList<>(postList, page, pageSize, count);
+	}
+	
 	private Query createQueryCountByRelatedLink(String relatedLink) {
 		return new Query(Criteria.where("relatedLinks").is(relatedLink));
 	}

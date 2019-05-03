@@ -15,6 +15,7 @@ import com.hotjobs.hotjobsbackend.post.domain.Post;
 public interface PostRepository extends MongoRepository<Post, String>, QuerydslPredicateExecutor<Post>  {
 	
 	public static final String QUERY_REGEX_BY_ENTITY = "{entities: {$elemMatch: { normal: {$regex:'.*?0.*', $options:'i'}}}}";
+	public static final String QUERY_REGEX_BY_TEXT = "{text_lower: {$regex:'.*?0.*', $options:'i'}}";
 	@Query(QUERY_REGEX_BY_ENTITY)
 	List<Post> findByEntity(String entity, Pageable pageable);
 	
@@ -25,4 +26,9 @@ public interface PostRepository extends MongoRepository<Post, String>, QuerydslP
 	 * @return List<Post> 
 	 */
 	List<Post> findByCreatedAtBetween(Date init, Date end, Pageable pageable);
+	
+	@Query(QUERY_REGEX_BY_TEXT)	
+	List<Post> findByText_lowerRegex(String lowerCase, Pageable pageable);
+	@Query(value=QUERY_REGEX_BY_TEXT, count=true)
+	long countByText_lowerRegex(String lowerCase);
 }

@@ -19,6 +19,7 @@ public interface PostDAO {
 	PaginatedList<Post> findByCreationDate(Date creationDate, int page, int pageSize);
 	PaginatedList<Post> findByRelatedLink(String relatedLink, int page, int pageSize);
 	PaginatedList<Post> findByCreationDateAndEntity(Date creationDate, String entity, int page, int pageSize);
+	PaginatedList<Post> findByText(String text, int page, int pageSize);
 	long total();
 	long countByEntity(String entity);
 	long countByCreationDate(Date creationDate);

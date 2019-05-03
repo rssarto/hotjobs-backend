@@ -98,6 +98,31 @@ public class PostRepositoryTest {
 		assertThat(postPage.getTotalElements()).isEqualTo(posts.size());
 	}
 	
+	@Test
+	public void findByText_ReturnPostList() {
+		final List<Post> posts = PostRepositoryTest.getPosts();
+		this.postRepository.deleteAll();
+		this.postRepository.insert(posts);
+		final String filter = "fintech";
+		
+		List<Post> postList = this.postRepository.findByText_lowerRegex(filter, PostDAO.getPageable(1, 5));
+		assertThat(postList).isNotNull();
+		postList.forEach(post -> {
+			assertThat(posts.contains(post)).isTrue();
+			assertThat(post.getText_lower().contains(filter)).isTrue();
+		});
+	}
+	
+	@Test
+	public void countByText_ShouldReturnTotal() {
+		final List<Post> posts = PostRepositoryTest.getPosts();
+		this.postRepository.deleteAll();
+		this.postRepository.insert(posts);
+		final String filter = "fintech";
+		long countByText_lowerRegex = this.postRepository.countByText_lowerRegex(filter);
+		assertThat(countByText_lowerRegex).isEqualTo(1L);
+	}
+	
 	public static List<Post> getPosts(){
 		final List<Post> posts = new ArrayList<>();
 		Date now = new Date();
