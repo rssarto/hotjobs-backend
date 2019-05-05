@@ -113,4 +113,14 @@ public class PostDAOImpl implements PostDAO {
 		return this.mongoTemplate.count(new PostQueryBuilder().setCreationDate(creationDate).build(), Post.COLLECTION_NAME);
 	}
 	
+	@Override	
+	public List<Post>findByCreatedAtLessThan(Date createdAt){
+		return this.postRepository.findByCreatedAtLessThan(createdAt);
+	}
+	
+	@Override	
+	public void deleteById(String id) {
+		this.postRepository.deleteById(id);
+	}
+	
 }

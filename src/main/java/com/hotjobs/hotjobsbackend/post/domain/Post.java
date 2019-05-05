@@ -11,11 +11,13 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 @Document(collection=Post.COLLECTION_NAME)
 @Getter
 @Setter
 @NoArgsConstructor
+@ToString
 public class Post extends AbstractDocument {
 	
 	public static final String COLLECTION_NAME = "post";

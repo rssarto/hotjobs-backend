@@ -29,6 +29,9 @@ public interface PostRepository extends MongoRepository<Post, String>, QuerydslP
 	
 	@Query(QUERY_REGEX_BY_TEXT)	
 	List<Post> findByText_lowerRegex(String lowerCase, Pageable pageable);
+	
 	@Query(value=QUERY_REGEX_BY_TEXT, count=true)
 	long countByText_lowerRegex(String lowerCase);
+	
+	List<Post>findByCreatedAtLessThan(Date createdAt);
 }

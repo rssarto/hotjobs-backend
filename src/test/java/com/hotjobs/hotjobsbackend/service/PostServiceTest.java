@@ -18,6 +18,7 @@ import com.hotjobs.hotjobsbackend.post.dao.PostDAO;
 import com.hotjobs.hotjobsbackend.post.domain.PaginatedList;
 import com.hotjobs.hotjobsbackend.post.domain.Post;
 import com.hotjobs.hotjobsbackend.post.domain.PostEntity;
+import com.hotjobs.hotjobsbackend.post.properties.PostPropertySource;
 import com.hotjobs.hotjobsbackend.post.service.PostService;
 import com.hotjobs.hotjobsbackend.post.service.PostServiceImpl;
 
@@ -27,11 +28,14 @@ public class PostServiceTest {
 	@Mock
 	PostDAO postDao;
 	
+	@Mock
+	PostPropertySource postPropertySource;
+	
 	private PostService postService;
 	
 	@Before
 	public void before() {
-		this.postService = new PostServiceImpl(this.postDao);
+		this.postService = new PostServiceImpl(this.postDao, this.postPropertySource);
 	}
 	
 	@Test

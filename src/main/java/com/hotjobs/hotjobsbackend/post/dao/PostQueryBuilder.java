@@ -3,6 +3,7 @@ package com.hotjobs.hotjobsbackend.post.dao;
 import java.util.Date;
 
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 
 import lombok.AllArgsConstructor;
@@ -40,21 +41,40 @@ public class PostQueryBuilder {
 	public Query build() {
 		final Query query = new Query();
 		if( StringUtils.isNotBlank(this.text_lower) ) {
-			query.addCriteria(PostDAO.criteriaByLowerText(this.text_lower));
+			query.addCriteria(criteriaByLowerText(this.text_lower));
 		}
 		
 		if( StringUtils.isNotBlank(this.entity) ) {
-			query.addCriteria(PostDAO.criteriaByEntity(entity));
+			query.addCriteria(criteriaByEntity(entity));
 		}
 		
 		if( this.creationDate != null ) {
-			query.addCriteria(PostDAO.criteriaByCreationDate(this.creationDate));
+			query.addCriteria(criteriaByCreationDate(this.creationDate));
 		}
 		
 		if( StringUtils.isNotBlank(this.relatedLink) ) {
-			query.addCriteria(PostDAO.relatedLinkCriteria(relatedLink));
+			query.addCriteria(criteriaByRelatedLink(relatedLink));
 		}
 		return query;
 	}
 	
+	
+	private Criteria criteriaByRelatedLink(String relatedLink) {
+		return Criteria.where("relatedLinks").is(relatedLink);
+	}
+	
+	private Criteria criteriaByEntity(String entity) {
+		return new Criteria("entities").elemMatch(new Criteria("normal").regex(String.format(".*%s.*", entity), "i"));
+	}
+	
+	private Criteria criteriaByLowerText(String text) {
+		return new Criteria("text_lower").regex(String.format(".*%s.*", text), "i");
+	}
+	
+	private Criteria criteriaByCreationDate(final Date creationDate) {
+		final Date initDateInterval = PostDAO.getInitDateInterval(creationDate);
+		final Date endDateInterval = PostDAO.getEndDateInterval(creationDate);
+		return new Criteria("createdAt").gt(initDateInterval).lt(endDateInterval);
+		
+	}
 }
