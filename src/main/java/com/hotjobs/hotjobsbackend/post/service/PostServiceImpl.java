@@ -75,8 +75,8 @@ public class PostServiceImpl implements PostService {
 		return this.postDAO.findByTextAndEntityAndCreationDate(text.toLowerCase(), entity, creationDate, page, pageSize);
 	}
 	
-//	@Scheduled(cron="0 0 23 ? * * *")
-	@Scheduled(cron="0 * * * * ?")
+	@Scheduled(cron="0 0 23 ? * * *")
+//	@Scheduled(cron="0 * * * * ?") every minute
 	private void removeOldPost() {
 		LOGGER.info("initiating removeOldPost");
 		Calendar calendar = Calendar.getInstance();
