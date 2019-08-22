@@ -1,5 +1,7 @@
 package com.hotjobs.hotjobsbackend.config.mongodb;
 
+import java.util.Objects;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -22,9 +24,14 @@ public class MongoConfigProfiles {
 
     @Bean
     public MongoDbFactory mongoDbFactory() throws Exception {
-    	MongoClient mongoClient = new MongoClient(
-			new MongoClientURI("mongodb://" + mongoProperties.getUsername() + ":" + mongoProperties.getPassword() + "@" + mongoProperties.getHost() + ":" + mongoProperties.getPort() + "/post")
-		);
+    	MongoClient mongoClient = null;
+    	if( Objects.isNull(mongoProperties.connectionUrl()) ) {
+    		mongoClient = new MongoClient(
+    				new MongoClientURI("mongodb://" + mongoProperties.getUsername() + ":" + mongoProperties.getPassword() + "@" + mongoProperties.getHost() + ":" + mongoProperties.getPort() + "/post")
+    				);
+    	}else {
+    		mongoClient = new MongoClient(new MongoClientURI(mongoProperties.connectionUrl()));
+    	}
         return new SimpleMongoDbFactory(mongoClient, mongoProperties.getDatabase());
     }
 

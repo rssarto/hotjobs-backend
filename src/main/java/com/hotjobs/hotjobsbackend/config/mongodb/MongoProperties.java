@@ -33,4 +33,8 @@ public class MongoProperties {
     public int getPort() {
         return environment.getProperty("spring.data.mongodb.port", Integer.class);
     }
+    
+    public String connectionUrl() {
+    	return environment.getProperty("spring.data.mongodb.url");
+    }
 }
