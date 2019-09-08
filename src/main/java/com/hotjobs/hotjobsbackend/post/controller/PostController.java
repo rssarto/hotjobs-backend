@@ -2,27 +2,43 @@ package com.hotjobs.hotjobsbackend.post.controller;
 
 import java.util.Date;
 
+import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.hotjobs.hotjobsbackend.post.domain.PaginatedList;
 import com.hotjobs.hotjobsbackend.post.domain.Post;
 import com.hotjobs.hotjobsbackend.post.service.PostService;
+import com.hotjobs.hotjobsbackend.post.validator.PostValidator;
 
 @RestController
 @RequestMapping(value="/api/v1/post")
 public class PostController {
 	
 	private PostService postService;
+	private PostValidator postValidator;
 	
-	public PostController(@Autowired PostService postService) {
+	@Autowired
+	public PostController(final PostService postService, final PostValidator postValidator) {
 		this.postService = postService;
+		this.postValidator = postValidator;
+	}
+	
+	@InitBinder
+	protected void initBinder(WebDataBinder binder) {
+		binder.addValidators(this.postValidator);
 	}
 	
 	@GetMapping("/{page}/{pageSize}")
@@ -71,6 +87,12 @@ public class PostController {
 	public ResponseEntity<PaginatedList<Post>> findByTextAndEntityAndCreationDate(@PathVariable final String text, @PathVariable final String entity, @PathVariable  final Date creationDate, @PathVariable  final int page, @PathVariable final int pageSize){
 		PaginatedList<Post> findByTextAndEntityAndCreationDate = this.postService.findByTextAndEntityAndCreationDate(text, entity, creationDate, page, pageSize);
 		return new ResponseEntity<>(findByTextAndEntityAndCreationDate, HttpStatus.OK);
+	}
+	
+	@PostMapping
+	@ResponseStatus(code=HttpStatus.CREATED)
+	public void create(@Valid @RequestBody Post post) {
+		this.postService.save(post);
 	}
 
 }

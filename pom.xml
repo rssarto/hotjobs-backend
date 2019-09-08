@@ -77,7 +77,10 @@
 		  <groupId>com.querydsl</groupId>
 		  <artifactId>querydsl-mongodb</artifactId>
 		</dependency>		
-		
+		<dependency>
+		   <groupId>com.fasterxml.jackson.datatype</groupId>
+		   <artifactId>jackson-datatype-jsr310</artifactId>
+		</dependency>		
 	</dependencies>
 
 	<build>

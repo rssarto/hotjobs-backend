@@ -91,5 +91,9 @@ public class PostServiceImpl implements PostService {
 			});
 		}
 	}
-	
+
+	@Override
+	public Post save(final Post post) {
+		return this.postDAO.save(post);
+	}
 }

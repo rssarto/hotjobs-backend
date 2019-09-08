@@ -15,4 +15,5 @@ public interface PostService {
 	PaginatedList<Post> findByTextAndEntityAndCreationDate(String text, String entity, Date creationDate, int page,int pageSize);
 	long total();
 	long countByEntity(String entity);
+	Post save(Post post);
 }

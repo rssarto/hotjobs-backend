@@ -122,5 +122,9 @@ public class PostDAOImpl implements PostDAO {
 	public void deleteById(String id) {
 		this.postRepository.deleteById(id);
 	}
-	
+
+	@Override
+	public Post save(Post post) {
+		return this.postRepository.save(post);
+	}
 }

@@ -1,37 +1,46 @@
 package com.hotjobs.hotjobsbackend.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
+import org.hamcrest.core.IsNull;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentMatchers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hotjobs.hotjobsbackend.post.controller.PostController;
 import com.hotjobs.hotjobsbackend.post.domain.PaginatedList;
 import com.hotjobs.hotjobsbackend.post.domain.Post;
 import com.hotjobs.hotjobsbackend.post.domain.PostEntity;
 import com.hotjobs.hotjobsbackend.post.repository.PostRepository;
 import com.hotjobs.hotjobsbackend.post.service.PostService;
+import com.hotjobs.hotjobsbackend.post.validator.PostValidator;
 import com.hotjobs.hotjobsbackend.service.PostServiceTest;
 
 @RunWith(SpringRunner.class)
-@WebMvcTest(controllers=PostController.class)
+@WebMvcTest(controllers= {PostValidator.class, PostController.class})
 public class PostControllerTest {
+	
+	private ObjectMapper mapper = new ObjectMapper();
 	
 	@MockBean
 	PostRepository postRepository;
@@ -171,5 +180,65 @@ public class PostControllerTest {
 			.andExpect(MockMvcResultMatchers.jsonPath("$.pageIndex").value(pageIndex))
 			.andExpect(MockMvcResultMatchers.jsonPath("$.pageNumber").value(pageSize));
 		
+	}
+	
+	@Test
+	public void createPost_shouldCreatePost() throws Exception {
+		final Post post = new Post();
+		post.setText("Senior Java #Developer - FinTech - £110,000 - onezeero. ( City of London, UK )  - [ 📋 More Info… https://t.co/EbXMHk5Xiz");
+		
+		when(this.postService.save(post)).then( answer -> {
+			return post;
+		});		
+		
+		this.mockMvc
+			.perform(MockMvcRequestBuilders.post("/api/v1/post")
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(mapper.writeValueAsString(post)))
+			.andExpect(MockMvcResultMatchers.status().isCreated());
+	}
+	
+	@Test
+	public void createPost_ShouldNotCreatedWithBlankText() throws Exception {
+		final Post post = new Post();
+		
+		when(this.postService.save(post)).then( answer -> {
+			return post;
+		});		
+		
+		this.mockMvc
+		.perform(MockMvcRequestBuilders.post("/api/v1/post")
+					.contentType(MediaType.APPLICATION_JSON)
+					.content(mapper.writeValueAsString(post)))
+		.andExpect(MockMvcResultMatchers.status().isBadRequest())
+		.andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON_UTF8))
+		.andExpect(jsonPath("$.status").value(HttpStatus.BAD_REQUEST.name()))
+		.andExpect(jsonPath("$.message").value("Validation error"))
+		.andExpect(jsonPath("$.subErrors", hasSize(1)))
+		.andExpect(jsonPath("$.subErrors[0].object").value("post"))
+		.andExpect(jsonPath("$.subErrors[0].field").value("text"))
+		.andExpect(jsonPath("$.subErrors[0].rejectedValue").value(IsNull.nullValue()))
+		.andExpect(jsonPath("$.subErrors[0].message").value(Post.Messages.Fields.TEXT_MANDATORY));
+		
+	}
+	
+	@Test
+	public void createPost_ShouldNotCreateWithDuplicatedLink() throws Exception {
+		final Post post = new Post("Senior Java #Developer - FinTech - £110,000 - onezeero. ( City of London, UK )  - [ 📋 More Info… https://t.co/EbXMHk5Xiz", new Date(), Arrays.asList(new PostEntity("London", "london")), Arrays.asList("https://t.co/EbXMHk5Xiz"));
+		final List<Post> posts = new ArrayList<>();
+		posts.add(post);
+		
+		when(this.postService.findByRelatedLink(post.getRelatedLinks().get(0), 1, 1)).then(answer -> {
+			return new PaginatedList<Post>(posts, 1, 1, 10);
+		});		
+		
+		this.mockMvc
+		.perform(MockMvcRequestBuilders.post("/api/v1/post")
+					.contentType(MediaType.APPLICATION_JSON)
+					.content(mapper.writeValueAsString(post)))
+		.andExpect(MockMvcResultMatchers.status().isBadRequest())
+		.andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON_UTF8))
+		.andExpect(jsonPath("$.status").value(HttpStatus.BAD_REQUEST.name()))
+		.andExpect(jsonPath("$.message").value(String.format("Duplicated link(s) %s", post.getRelatedLinks().toString())));		
 	}
 }

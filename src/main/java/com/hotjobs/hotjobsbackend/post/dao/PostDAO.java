@@ -59,4 +59,5 @@ public interface PostDAO {
 		}
 		return endDate;
 	}
+	Post save(Post post);
 }

@@ -3,6 +3,7 @@ package com.hotjobs.hotjobsbackend.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -116,6 +117,12 @@ public class PostServiceTest {
 		posts.add(new Post("Senior Java #Developer - FinTech - £110,000 - onezeero. ( City of London, UK )  - [ 📋 More Info… https://t.co/EbXMHk5Xiz", new Date(), Arrays.asList(new PostEntity("London", "london")), Arrays.asList("https://t.co/EbXMHk5Xiz")));
 		posts.add(new Post("TechNet IT Recruitment (Permanent): Java Developer - Paris ... https://t.co/q5hOjvtU8l", new Date(), Arrays.asList(new PostEntity("- Paris", "paris")), Arrays.asList("https://t.co/q5hOjvtU8l")));
 		return posts;
+	}
+	
+	@Test
+	public void accessApplicationPropertiesFile() {
+		File file = new File("src/main/resources/application-dev.properties");
+		assertThat(file.exists()).isTrue();
 	}
 
 }
