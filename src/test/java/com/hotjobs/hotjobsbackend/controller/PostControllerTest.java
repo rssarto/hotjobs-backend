@@ -184,8 +184,14 @@ public class PostControllerTest {
 	
 	@Test
 	public void createPost_shouldCreatePost() throws Exception {
-		final Post post = new Post();
-		post.setText("Senior Java #Developer - FinTech - £110,000 - onezeero. ( City of London, UK )  - [ 📋 More Info… https://t.co/EbXMHk5Xiz");
+		final Post post = new Post("Senior Java #Developer - FinTech - £110,000 - onezeero. ( City of London, UK )  - [ 📋 More Info… https://t.co/EbXMHk5Xiz", new Date(), Arrays.asList(new PostEntity("London", "london")), Arrays.asList("https://t.co/EbXMHk5Xiz"));
+		final List<Post> posts = new ArrayList<>();
+		posts.add(post);		
+		
+		
+		when(this.postService.findByRelatedLink(post.getRelatedLinks().get(0), 1, 1)).then(answer -> {
+			return new PaginatedList<Post>(posts, 1, 1, 0);
+		});		
 		
 		when(this.postService.save(post)).then( answer -> {
 			return post;
@@ -200,7 +206,13 @@ public class PostControllerTest {
 	
 	@Test
 	public void createPost_ShouldNotCreatedWithBlankText() throws Exception {
-		final Post post = new Post();
+		final Post post = new Post("", new Date(), Arrays.asList(new PostEntity("London", "london")), Arrays.asList("https://t.co/EbXMHk5Xiz"));
+		final List<Post> posts = new ArrayList<>();
+		posts.add(post);		
+		
+		when(this.postService.findByRelatedLink(post.getRelatedLinks().get(0), 1, 1)).then(answer -> {
+			return new PaginatedList<Post>(posts, 1, 1, 0);
+		});		
 		
 		when(this.postService.save(post)).then( answer -> {
 			return post;
@@ -217,7 +229,7 @@ public class PostControllerTest {
 		.andExpect(jsonPath("$.subErrors", hasSize(1)))
 		.andExpect(jsonPath("$.subErrors[0].object").value("post"))
 		.andExpect(jsonPath("$.subErrors[0].field").value("text"))
-		.andExpect(jsonPath("$.subErrors[0].rejectedValue").value(IsNull.nullValue()))
+		.andExpect(jsonPath("$.subErrors[0].rejectedValue").value(""))
 		.andExpect(jsonPath("$.subErrors[0].message").value(Post.Messages.Fields.TEXT_MANDATORY));
 		
 	}
@@ -241,4 +253,50 @@ public class PostControllerTest {
 		.andExpect(jsonPath("$.status").value(HttpStatus.BAD_REQUEST.name()))
 		.andExpect(jsonPath("$.message").value(String.format("Duplicated link(s) %s", post.getRelatedLinks().toString())));		
 	}
+	
+	@Test
+	public void createPost_ShouldNotAcceptEmptyLinkList() throws Exception {
+		final Post post = new Post("Senior Java #Developer - FinTech - £110,000 - onezeero. ( City of London, UK )  - [ 📋 More Info… https://t.co/EbXMHk5Xiz", new Date(), Arrays.asList(new PostEntity("London", "london")), new ArrayList<>());
+		
+		when(this.postService.save(post)).then( answer -> {
+			return post;
+		});		
+		
+		this.mockMvc
+		.perform(MockMvcRequestBuilders.post("/api/v1/post")
+					.contentType(MediaType.APPLICATION_JSON)
+					.content(mapper.writeValueAsString(post)))
+		.andExpect(MockMvcResultMatchers.status().isBadRequest())
+		.andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON_UTF8))
+		.andExpect(jsonPath("$.status").value(HttpStatus.BAD_REQUEST.name()))
+		.andExpect(jsonPath("$.message").value("Validation error"))
+		.andExpect(jsonPath("$.subErrors", hasSize(1)))
+		.andExpect(jsonPath("$.subErrors[0].object").value("post"))
+		.andExpect(jsonPath("$.subErrors[0].field").value("relatedLinks"))
+		.andExpect(jsonPath("$.subErrors[0].rejectedValue.length()").value(0))
+		.andExpect(jsonPath("$.subErrors[0].message").value(Post.Messages.Fields.LINK_LIST_MANDATORY));
+	}
+	@Test
+	public void createPost_ShouldNotAcceptNullLinkList() throws Exception {
+		final Post post = new Post("Senior Java #Developer - FinTech - £110,000 - onezeero. ( City of London, UK )  - [ 📋 More Info… https://t.co/EbXMHk5Xiz", new Date(), Arrays.asList(new PostEntity("London", "london")), null);
+		
+		when(this.postService.save(post)).then( answer -> {
+			return post;
+		});		
+		
+		this.mockMvc
+		.perform(MockMvcRequestBuilders.post("/api/v1/post")
+					.contentType(MediaType.APPLICATION_JSON)
+					.content(mapper.writeValueAsString(post)))
+		.andExpect(MockMvcResultMatchers.status().isBadRequest())
+		.andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON_UTF8))
+		.andExpect(jsonPath("$.status").value(HttpStatus.BAD_REQUEST.name()))
+		.andExpect(jsonPath("$.message").value("Validation error"))
+		.andExpect(jsonPath("$.subErrors", hasSize(2)))
+		.andExpect(jsonPath("$.subErrors[0].object").value("post"))
+		.andExpect(jsonPath("$.subErrors[0].field").value("relatedLinks"))
+		.andExpect(jsonPath("$.subErrors[0].rejectedValue").value(IsNull.nullValue()))
+		.andExpect(jsonPath("$.subErrors[0].message").value(Post.Messages.Fields.LINK_LIST_MANDATORY));
+	}
+	
 }

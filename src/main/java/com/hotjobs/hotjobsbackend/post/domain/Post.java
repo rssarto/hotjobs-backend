@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Objects;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -33,6 +35,9 @@ public class Post extends AbstractDocument {
 	private String text_lower;
 	private Date createdAt;
 	private List<PostEntity> entities;
+	
+	@NotEmpty(message=Messages.Fields.LINK_LIST_MANDATORY)
+	@NotNull(message=Messages.Fields.LINK_LIST_MANDATORY)
 	private List<String> relatedLinks;
 	
 	public Post(String text, Date createdAt, List<PostEntity> entities, List<String> relatedLinks) {
@@ -98,6 +103,7 @@ public class Post extends AbstractDocument {
 	public static class Messages {
 		public static class Fields {
 			public static final String TEXT_MANDATORY = "Text is mandatory";
+			public static final String LINK_LIST_MANDATORY = "Links are mandatory";
 		}
 	}
 }
